@@ -1,40 +1,29 @@
-// app/login.tsx
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { login } from "@/hooks/api";
+import { router } from "expo-router";
+import { useState } from "react";
 import {
-    Alert,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
-
-    if (!emailRegex.test(email)) {
-      Alert.alert('Correo inválido', 'Ingresa un correo electrónico válido.');
-      return;
-    }
-
-    if (!passwordRegex.test(password)) {
-      Alert.alert(
-        'Contraseña inválida',
-        'La contraseña debe tener al menos 6 caracteres, incluyendo una letra y un número.'
-      );
-      return;
-    }
-
-    // Si pasa la validación, navega a la app
-    router.replace('/(tabs)');
-  };
+  const handleLogin = async () => {
+      try {
+        const data = await login(email, password);
+        console.log("Login exitoso:", data);
+        router.replace("/(tabs)");
+      } catch (err: any) {
+        Alert.alert("Error", err.message);
+      }
+    };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -70,34 +59,34 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
+    backgroundColor: "#fff",
+    justifyContent: "center",
     padding: 24,
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 32,
-    textAlign: 'center',
+    textAlign: "center",
   },
   form: {
     gap: 16,
   },
   input: {
-    backgroundColor: '#f2f2f2',
+    backgroundColor: "#f2f2f2",
     padding: 12,
     borderRadius: 8,
-    color: '#000',
+    color: "#000",
   },
   button: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     padding: 14,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: "#fff",
+    fontWeight: "600",
     fontSize: 16,
   },
 });

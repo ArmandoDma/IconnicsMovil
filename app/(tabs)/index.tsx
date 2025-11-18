@@ -1,4 +1,4 @@
-import HomeScreen from "@/components/homepage";
+import HomeScreen from "./views/homepage";
 
 const index = () => {
   return (

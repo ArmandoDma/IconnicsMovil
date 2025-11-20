@@ -1,5 +1,5 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import Icon from "react-native-vector-icons/Ionicons";
 export default function TabLayout() {
   return (
     <Tabs
@@ -12,7 +12,7 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color, focused }) => (
-            <Icon
+            <Ionicons
               name={focused ? "home" : "home-outline"}
               size={28}
               color={color}
@@ -26,7 +26,7 @@ export default function TabLayout() {
         options={{
           title: "Performance",
           tabBarIcon: ({ color, focused }) => (
-            <Icon
+            <Ionicons
               name={focused ? "speedometer" : "speedometer-outline"}
               size={26}
               color={color}
@@ -39,7 +39,7 @@ export default function TabLayout() {
         options={{
           title: "Body Data",
           tabBarIcon: ({ color, focused }) => (
-            <Icon
+            <Ionicons
               name={focused ? "body" : "body-outline"}
               size={26}
               color={color}
@@ -52,7 +52,7 @@ export default function TabLayout() {
         options={{
           title: "Benefits",
           tabBarIcon: ({ color, focused }) => (
-            <Icon
+            <Ionicons
               name={focused ? "medkit" : "medkit-outline"}
               size={26}
               color={color}
@@ -65,7 +65,7 @@ export default function TabLayout() {
         options={{
           title: "Perfil",
           tabBarIcon: ({ color, focused }) => (
-            <Icon
+            <Ionicons
               name={focused ? "person-circle" : "person-circle-outline"}
               size={26}
               color={color}

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://192.168.0.195:3000/api/usuarios';
+const BASE_URL = 'https://iconnicsserver.zeabur.app/api/usuarios';
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -34,8 +34,8 @@ export async function login(correo: string, contrasena: string) {
       correo,
       contrasena,
     });
-
-    return response.data; // ← token, usuario, etc.
+    
+    return response.data;
   } catch (error: any) {
     if (error.response) {
       throw new Error(error.response.data.message || 'Error de autenticación');

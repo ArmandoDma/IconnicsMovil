@@ -1,14 +1,7 @@
 import { login } from "@/hooks/api";
 import { router } from "expo-router";
 import { useState } from "react";
-import {
-  Alert,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, Image, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
@@ -16,77 +9,134 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-      try {
-        const data = await login(email, password);
-        console.log("Login exitoso:", data);
-        router.replace("/(tabs)");
-      } catch (err: any) {
-        Alert.alert("Error", err.message);
-      }
-    };
+    try {
+      const data = await login(email, password);
+      console.log("Login exitoso:", data);
+      router.replace("/(tabs)");
+    } catch (err: any) {
+      Alert.alert("Error", err.message);
+    }
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Inicia sesión</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.loginCt}>
+        <View style={styles.loginContainer}>
+          <View style={styles.logo}>
+            <Image source={require("../assets/images/android-icon-foreground.png")} style={styles.logoImage} />
+            <Text style={styles.logoText}>Iconnics</Text>
+          </View>
 
-      <View style={styles.form}>
-        <TextInput
-          placeholder="ejemplo@correo.com"
-          keyboardType="email-address"
-          placeholderTextColor={"#000"}
-          autoCapitalize="none"
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          placeholder="Mínimo 6 caracteres, con número"
-          secureTextEntry
-          placeholderTextColor={"#000"}
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword}
-        />
+          <View style={styles.loginForm}>
+            <Text style={styles.label}>Correo electrónico</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ingresa tu correo"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
+            />
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Entrar</Text>
-        </TouchableOpacity>
+            <Text style={styles.label}>Contraseña</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ingresa tu contraseña"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+            />
+
+            <TouchableOpacity style={styles.btnPrimary} onPress={handleLogin}>
+              <Text style={styles.btnText}>Iniciar sesión</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.foot}>
+            ¿No tienes cuenta? {" "} <Pressable onPress={() => router.push("/register")}><Text style={styles.link}>Regístrate</Text></Pressable>
+          </Text>
+        </View>
       </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  loginCt: {
+    flex: 1,
     justifyContent: "center",
-    padding: 24,
+    alignItems: "center",
+    paddingHorizontal: "2.5%",
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 32,
-    textAlign: "center",
-  },
-  form: {
-    gap: 16,
-  },
-  input: {
-    backgroundColor: "#f2f2f2",
-    padding: 12,
-    borderRadius: 8,
-    color: "#000",
-  },
-  button: {
-    backgroundColor: "#007AFF",
-    padding: 14,
-    borderRadius: 8,
+  loginContainer: {
+    width: "90%",
+    padding: 32,
+    borderWidth: 1,
+    borderColor: "#aaa",
+    shadowColor: "#5f5e5e",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 15,
+    elevation: 5,
+    backgroundColor: "#fff",
     alignItems: "center",
   },
-  buttonText: {
+  logo: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 24,
+  },
+  logoImage: {
+    width: 72,
+    height: 72,
+    resizeMode: "cover",
+  },
+  logoText: {
+    fontSize: 48,
+    color: "#297bef",
+    lineHeight: 72,
+    fontWeight: "600",
+    marginLeft: 12,
+  },
+  loginForm: {
+    width: "100%",
+  },
+  label: {
+    fontSize: 14,
+    marginBottom: 5,
+    color: "#000",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#aaa",
+    padding: 10,
+    fontSize: 14,
+    borderRadius: 5,
+    marginBottom: 10,
+    color: "#297bef",
+  },
+  btnPrimary: {
+    backgroundColor: "#297bef",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  btnText: {
     color: "#fff",
     fontWeight: "600",
-    fontSize: 16,
   },
+  foot: {
+    fontSize: 14,
+    color: "#000",
+  },
+  link: {
+    color: "#297bef",
+    textDecorationLine: "underline",
+  }
 });

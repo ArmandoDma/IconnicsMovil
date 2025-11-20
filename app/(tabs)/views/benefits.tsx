@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import {
   ScrollView,
   StyleSheet,
@@ -6,7 +7,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Icon from "react-native-vector-icons/Ionicons";
 
 export default function benefits() {
   return (
@@ -55,7 +55,7 @@ function BenefitCard({
 }) {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
-      <Icon name={icon} size={32} color="#007AFF" />
+      <Ionicons name={icon} size={32} color="#007AFF" />
       <Text style={styles.cardText}>{title}</Text>
     </TouchableOpacity>
   );

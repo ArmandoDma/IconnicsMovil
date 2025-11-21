@@ -1,5 +1,5 @@
 import { WeeklyChart } from "@/components/linechart";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 const quickStats = [
   { title: "Calorías", value: "523 kcal" },
@@ -22,7 +22,7 @@ const highlights = [
 
 export default function PerformanceScreen() {
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {/* Resumen Rápido */}
       <Text style={styles.sectionTitle}>Resumen Rápido</Text>
       <View style={styles.statsGrid}>
@@ -58,19 +58,19 @@ export default function PerformanceScreen() {
           <Text key={index} style={styles.highlightItem}>{text}</Text>
         ))}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     padding: 20,
-    marginBottom: 30,
-    backgroundColor: "#ffffff", // var(--bg)
+    backgroundColor: "#ffffff",
   },
   sectionTitle: {
-    fontSize: 22, // 1.4rem aprox
+    fontSize: 22,
     marginBottom: 15,
-    color: "#0057ff", // var(--primary)
+    color: "#0057ff",
     fontWeight: "700",
   },
 

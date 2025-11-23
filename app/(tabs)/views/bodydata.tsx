@@ -1,6 +1,6 @@
+import StepsChart from "@/components/piechart";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
 import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const {width} = Dimensions.get("window")
@@ -31,13 +31,13 @@ export default function DModelSection() {
             </View>
             <View style={styles.userCap}>
               <View style={styles.tabs}>
-                <Text>Weight: 70 kg</Text>
-                <Text>Blood Type: A+</Text>
+                <Text style={styles.cardSubtitle}>Weight: 70 kg</Text>
+                <Text style={styles.cardSubtitle}>Blood Type: A+</Text>
               </View>
               <Text style={styles.username}>Username</Text>
               <View style={styles.caps}>
-                <Text>Genre: Male</Text>
-                <Text>Age: 23 years old</Text>
+                <Text style={styles.cardSubtitle}>Genre: Male</Text>
+                <Text style={styles.cardSubtitle}>Age: 23 years old</Text>
               </View>
             </View>
           </LinearGradient>
@@ -98,7 +98,7 @@ export default function DModelSection() {
 
           {/* Steps Chart Placeholder */}
           <View style={styles.stepsChart}>
-            <Text style={{ color: "#999" }}>Steps Chart Placeholder</Text>
+            <StepsChart />
           </View>
         </View>
       </View>
@@ -171,11 +171,12 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 20,
     fontWeight: "700",
+    color: "#fff",
     marginVertical: 5,
   },
   caps: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-between"    
   },
   grid:{  
     display: 'flex',
@@ -186,25 +187,27 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   cardHealth: {
-    width: width / 2.375,
+    width: width / 2.3,
     padding: 20,
     height: 100,
     borderRadius: 15,
   },
   cardSubtitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#fff",
+    fontSize: 15,
+    marginBottom: 5,
+    fontWeight: "400",
+    color: "#aaa",
   },
   cardValue: {
     fontSize: 16,
     color: "#4caf50",
   },
   cardRow: {
-    width: width /2.375,
+    width: width /2.3,
     height: 100,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: "#ddd",
     color: '#000',
@@ -214,6 +217,7 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     flex: 1,
+    marginLeft: 10,
   },
   groupHeader: {
     marginTop: 15,
@@ -237,6 +241,7 @@ const styles = StyleSheet.create({
   },
   testInfo: {
     flex: 1,
+    marginLeft: 10,
   },
   stepsChart: {
     marginTop: 15,

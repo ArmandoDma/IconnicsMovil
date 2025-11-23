@@ -1,83 +1,94 @@
 import { BarcharGraph } from "@/components/barchar";
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { healthTips, notifications } from "../../../components/tips";
 
-
-
-
 export function HomeScreen() {
- 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Dashboard</Text>
-        <Text style={styles.subtitle}>
-          Welcome back! Here's an overview of your health metrics and recent activity.
-        </Text>
-      </View>
+    <SafeAreaView style={{backgroundColor: "#fff"}}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Dashboard</Text>
+          <Text style={styles.subtitle}>
+            Welcome back! Here's an overview of your health metrics and recent
+            activity.
+          </Text>
+        </View>
 
-      <View style={styles.metricsGrid}>
-        <View style={[styles.metricCard, styles.cardBlue]}>
-          <Text style={styles.metricTitle}>Average Heart Rate</Text>
-          <Text style={styles.metricValue}>0 bpm</Text>
-        </View>
-        <View style={[styles.metricCard, styles.cardOrange]}>
-          <Text style={styles.metricTitle}>Average Blood Oxygen</Text>
-          <Text style={styles.metricValue}>0%</Text>
-        </View>
-        <View style={[styles.metricCard, styles.cardBlue]}>
-          <Text style={styles.metricTitle}>Average Hydratation</Text>
-          <Text style={styles.metricValue}>0%</Text>
-        </View>
-        <View style={[styles.metricCard, styles.cardOrange]}>
-          <Text style={styles.metricTitle}>Average Lose Calories</Text>
-          <Text style={styles.metricValue}>0 kcal</Text>
-        </View>
-        <View style={styles.chartSection}>
-          <Text style={styles.chartTitle}>Project Analytics</Text>
-          <View style={styles.chart}>
-            <BarcharGraph></BarcharGraph>                       
+        <View style={styles.metricsGrid}>
+          <View style={[styles.metricCard, styles.cardBlue]}>
+            <Text style={styles.metricTitle}>Average Heart Rate</Text>
+            <Text style={styles.metricValue}>0 bpm</Text>
+          </View>
+          <View style={[styles.metricCard, styles.cardOrange]}>
+            <Text style={styles.metricTitle}>Average Blood Oxygen</Text>
+            <Text style={styles.metricValue}>0%</Text>
+          </View>
+          <View style={[styles.metricCard, styles.cardBlue]}>
+            <Text style={styles.metricTitle}>Average Hydratation</Text>
+            <Text style={styles.metricValue}>0%</Text>
+          </View>
+          <View style={[styles.metricCard, styles.cardOrange]}>
+            <Text style={styles.metricTitle}>Average Lose Calories</Text>
+            <Text style={styles.metricValue}>0 kcal</Text>
+          </View>
+          <View style={styles.chartSection}>
+            <Text style={styles.chartTitle}>Project Analytics</Text>
+            <View style={styles.chart}>
+              <BarcharGraph></BarcharGraph>
+            </View>
+          </View>
+
+          <View style={styles.tipsSection}>
+            <Text style={styles.sectionTitle}>Health Tips</Text>
+            {healthTips.map((tip, index) => (
+              <View key={index} style={styles.tipItem}>
+                <View style={styles.tipIcon}>
+                  <Image source={tip.icon} style={styles.tipImage} />
+                </View>
+                <View style={styles.tipContent}>
+                  <Text style={styles.tipTitle}>{tip.food}</Text>
+                  <Text style={styles.tipNutrients}>
+                    <Text style={styles.tipLabel}>Nutrients:</Text>{" "}
+                    {tip.nutrients.join(", ")}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.notifySection}>
+            <Text style={styles.sectionTitle}>Last Notifications</Text>
+            {notifications.map((note, index) => (
+              <View key={index} style={styles.notiItem}>
+                <View style={styles.notiIcon}>
+                  <Image
+                    source={require("../../../assets/images/icon.png")}
+                    style={styles.notiImage}
+                  />
+                </View>
+                <View style={styles.notiContent}>
+                  <Text style={styles.notiTitle}>{note.title}</Text>
+                  <Text style={styles.notiText}>{note.content}</Text>
+                  <Text style={styles.notiTime}>{note.time}</Text>
+                </View>
+              </View>
+            ))}
+            <TouchableOpacity style={styles.seeMoreBtn}>
+              <Text style={styles.seeMoreText}>See More</Text>
+            </TouchableOpacity>
           </View>
         </View>
-
-        <View style={styles.tipsSection}>
-          <Text style={styles.sectionTitle}>Health Tips</Text>
-          {healthTips.map((tip, index) => (
-            <View key={index} style={styles.tipItem}>
-              <View style={styles.tipIcon}>
-                <Image source={tip.icon} style={styles.tipImage} />
-              </View>
-              <View style={styles.tipContent}>
-                <Text style={styles.tipTitle}>{tip.food}</Text>
-                <Text style={styles.tipNutrients}>
-                  <Text style={styles.tipLabel}>Nutrients:</Text> {tip.nutrients.join(", ")}
-                </Text>
-              </View>
-            </View>
-          ))}
-        </View>
-
-        <View style={styles.notifySection}>
-          <Text style={styles.sectionTitle}>Last Notifications</Text>
-          {notifications.map((note, index) => (
-            <View key={index} style={styles.notiItem}>
-              <View style={styles.notiIcon}>
-                <Image source={require("../../../assets/images/icon.png")} style={styles.notiImage} />
-              </View>
-              <View style={styles.notiContent}>
-                <Text style={styles.notiTitle}>{note.title}</Text>
-                <Text style={styles.notiText}>{note.content}</Text>
-                <Text style={styles.notiTime}>{note.time}</Text>
-              </View>
-            </View>
-          ))}
-          <TouchableOpacity style={styles.seeMoreBtn}>
-            <Text style={styles.seeMoreText}>See More</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ScrollView>
-  )
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -132,19 +143,19 @@ const styles = StyleSheet.create({
     height: 300,
     backgroundColor: "#f0f0f0",
     padding: 20,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderRadius: 20,
     borderColor: "#aaa",
     borderWidth: 1,
     marginBottom: 20,
-    position: 'relative'
+    position: "relative",
   },
-  chart:{
-    width: '100%',
-    alignItems: 'center',
+  chart: {
+    width: "100%",
+    alignItems: "center",
     left: -20,
-    position: 'absolute',
-    zIndex: 100
+    position: "absolute",
+    zIndex: 100,
   },
   chartTitle: {
     fontSize: 18,

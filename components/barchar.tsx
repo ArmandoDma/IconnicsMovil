@@ -1,6 +1,8 @@
+import { Dimensions } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
 
 export const BarcharGraph = () => {
+    const {width} = Dimensions.get('window');
     const data = [28, 32, 34, 45, 65, 70, 90];
     const projectedDays = [false, false, false, false, true, true, true];
     const backgroundColors = projectedDays.map((isProjected) =>
@@ -17,7 +19,7 @@ export const BarcharGraph = () => {
         <BarChart
             data={chartData}
             barWidth={30}
-            width={screen.width - 60}
+            width={width - 60}
             height={220}
             maxValue={100}
             noOfSections={4}

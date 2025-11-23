@@ -1,6 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
-import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
@@ -23,12 +31,36 @@ const slides = [
 ];
 
 const benefits = [
-  { icon: "barbell", title: "Gym Discounts", desc: "Save up to 30% in partnered gyms for staying active." },
-  { icon: "pricetags", title: "Exclusive Coupons", desc: "Weekly discount codes for nutrition stores and cafés." },
-  { icon: "gift", title: "Reward Points", desc: "Earn points for daily steps and exchange for perks." },
-  { icon: "bicycle", title: "Challenges Access", desc: "Join health challenges and unlock achievement badges." },
-  { icon: "heart", title: "Wellness Tips", desc: "Receive curated health advice based on your metrics." },
-  { icon: "storefront", title: "Partner Stores", desc: "Special deals in fitness and wellness product stores." },
+  {
+    icon: "barbell",
+    title: "Gym Discounts",
+    desc: "Save up to 30% in partnered gyms for staying active.",
+  },
+  {
+    icon: "pricetags",
+    title: "Exclusive Coupons",
+    desc: "Weekly discount codes for nutrition stores and cafés.",
+  },
+  {
+    icon: "gift",
+    title: "Reward Points",
+    desc: "Earn points for daily steps and exchange for perks.",
+  },
+  {
+    icon: "bicycle",
+    title: "Challenges Access",
+    desc: "Join health challenges and unlock achievement badges.",
+  },
+  {
+    icon: "heart",
+    title: "Wellness Tips",
+    desc: "Receive curated health advice based on your metrics.",
+  },
+  {
+    icon: "storefront",
+    title: "Partner Stores",
+    desc: "Special deals in fitness and wellness product stores.",
+  },
 ];
 
 export default function BenefitsSection() {
@@ -40,7 +72,7 @@ export default function BenefitsSection() {
       const nextIndex = (index + 1) % slides.length;
       setIndex(nextIndex);
       if (scrollRef.current) {
-        scrollRef.current.scrollTo({ x: nextIndex * width, animated: true });
+        scrollRef.current.scrollTo({ x: nextIndex * width - 40, animated: true });
       }
     }, 3000);
 
@@ -48,44 +80,44 @@ export default function BenefitsSection() {
   }, [index]);
 
   return (
-    <ScrollView style={styles.container}>
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        style={styles.carousel}
-      >
-        {slides.map((slide, i) => (
-          <View key={i} style={styles.slide}>
-            <Image source={{ uri: slide.img }} style={styles.slideImage} />
-            <View style={styles.slideText}>
-              <Text style={styles.slideTitle}>{slide.title}</Text>
-              <Text style={styles.slideDesc}>{slide.desc}</Text>
+    <SafeAreaView style={{backgroundColor: "#fff"}}>
+      <ScrollView style={styles.container}>
+        <ScrollView
+          ref={scrollRef}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          style={styles.carousel}
+        >
+          {slides.map((slide, i) => (
+            <View key={i} style={styles.slide}>
+              <Image source={{ uri: slide.img }} style={styles.slideImage} />
+              <View style={styles.slideText}>
+                <Text style={styles.slideTitle}>{slide.title}</Text>
+                <Text style={styles.slideDesc}>{slide.desc}</Text>
+              </View>
             </View>
-          </View>
-        ))}
+          ))}
+        </ScrollView>
+
+        {/* Benefits Grid */}
+        <Text style={styles.sectionTitle}>Available Benefits</Text>
+        <View style={styles.grid}>
+          {benefits.map((item, index) => (
+            <View key={index} style={styles.card}>
+              <Ionicons name={item.icon} size={26} color="#1665f8" />
+              <Text style={styles.cardTitle}>{item.title}</Text>
+              <Text style={styles.cardDesc}>{item.desc}</Text>
+            </View>
+          ))}
+        </View>
       </ScrollView>
-
-
-      {/* Benefits Grid */}
-      <Text style={styles.sectionTitle}>Available Benefits</Text>
-      <View style={styles.grid}>
-        {benefits.map((item, index) => (
-          <View key={index} style={styles.card}>
-            <Ionicons name={item.icon} size={26} color="#1665f8" />
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <Text style={styles.cardDesc}>{item.desc}</Text>
-          </View>
-        ))}
-      </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 20,
     backgroundColor: "#fff",
   },
@@ -104,7 +136,7 @@ const styles = StyleSheet.create({
   slide: {
     width: width - 40,
     height: 350,
-    backgroundColor: '#ffed34',
+    backgroundColor: "#ffed34",
     borderRadius: 16,
     overflow: "hidden",
   },
@@ -119,7 +151,7 @@ const styles = StyleSheet.create({
     left: 10,
     textShadowColor: "rgba(0,0,0,0.6)",
     textShadowOffset: { width: 0, height: 3 },
-    textShadowRadius: 10
+    textShadowRadius: 10,
   },
   slideTitle: {
     fontSize: 20,

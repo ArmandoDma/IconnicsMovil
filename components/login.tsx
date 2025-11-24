@@ -1,18 +1,49 @@
 import { login } from "@/hooks/api";
+import { getLastValidTokenByUser } from "@/hooks/apiToken";
+import { useAuth } from "@/hooks/authcontext";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, Image, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const {setUser} = useAuth()
 
   const handleLogin = async () => {
     try {
       const data = await login(email, password);
-      console.log("Login exitoso:", data);
-      router.replace("/(tabs)");
+      const userId = data.usuario.id;
+      setUser(data.usuario)
+
+      // Traer el último token desde la DB
+      const lastToken = await getLastValidTokenByUser(userId);
+      console.log("Último token:", lastToken);
+
+      // Validar si está activo y vigente
+      const isValid =
+        lastToken &&
+        lastToken.activo === 1 &&
+        new Date(lastToken.fecha_expiracion) > new Date();
+
+      if (isValid) {
+        console.log("Token válido, entrando directo a la app");
+        router.replace("/(tabs)");
+      } else {
+        console.log("Token inválido o expirado, redirigiendo al login");
+        Alert.alert("Sesión expirada", "Por favor inicia sesión de nuevo");
+      }
+
     } catch (err: any) {
       Alert.alert("Error", err.message);
     }
@@ -23,7 +54,10 @@ export default function LoginScreen() {
       <View style={styles.loginCt}>
         <View style={styles.loginContainer}>
           <View style={styles.logo}>
-            <Image source={require("../assets/images/android-icon-foreground.png")} style={styles.logoImage} />
+            <Image
+              source={require("../assets/images/android-icon-foreground.png")}
+              style={styles.logoImage}
+            />
             <Text style={styles.logoText}>Iconnics</Text>
           </View>
 
@@ -55,13 +89,16 @@ export default function LoginScreen() {
           </View>
 
           <Text style={styles.foot}>
-            ¿No tienes cuenta? {" "} <Pressable onPress={() => router.push("/register")}><Text style={styles.link}>Regístrate</Text></Pressable>
+            ¿No tienes cuenta?{" "}
+            <Pressable onPress={() => router.push("/register")}>
+              <Text style={styles.link}>Regístrate</Text>
+            </Pressable>
           </Text>
         </View>
       </View>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -140,5 +177,5 @@ const styles = StyleSheet.create({
   link: {
     color: "#297bef",
     textDecorationLine: "underline",
-  }
+  },
 });

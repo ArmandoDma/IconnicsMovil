@@ -3,19 +3,19 @@ export const healthTips = [
     food: "Avocado Toast",
     nutrients: ["Healthy Fats", "Potassium", "Vitamin E"],
     prep: "Mash avocado on whole grain toast, add chili flakes and lemon juice.",
-    icon:"../images/toast_avo.webp"
+    icon: require("../assets/images/toast_avo.webp")
   },
   {
     food: "Greek Yogurt Parfait",
     nutrients: ["Protein", "Probiotics", "Antioxidants"],
     prep: "Layer Greek yogurt with berries, oats, and a drizzle of honey.",
-    icon: "../images/greek_you.webp"
+    icon: require("../assets/images/greek_you.webp")
   },
   {
     food: "Oats & Banana Pancakes",
     nutrients: ["Fiber", "Potassium", "Slow Carbs"],
     prep: "Blend oats, banana, egg, and cinnamon. Cook like pancakes.",
-    icon: "../images/pancakes.jpg"
+    icon: require("../assets/images/pancakes.jpg")
   }
 ];
 

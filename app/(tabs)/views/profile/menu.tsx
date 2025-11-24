@@ -1,3 +1,5 @@
+import { logoutToken } from "@/hooks/apiToken";
+import { useAuth } from "@/hooks/authcontext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -13,6 +15,24 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MenuScreen() {
   const router = useRouter();
+  const {user, setUser} = useAuth()
+
+  const handleLogout = async () => {
+  try {
+    if (user) {
+      console.log("Logout con id:", user.id); // <-- debug
+      const res = await logoutToken(user.id);
+      console.log("Respuesta API:", res);
+
+      await setUser(null);
+      router.replace("/login");
+    } else {
+      console.log("No hay usuario en contexto");
+    }
+  } catch (err: any) {
+    console.error("Error en logout:", err.message);
+  }
+};
 
   const [dailyReminders, setDailyReminders] = useState(true);
   const [promotions, setPromotions] = useState(false);
@@ -149,7 +169,7 @@ export default function MenuScreen() {
               Account
             </Text>
           </View>
-          <TouchableOpacity style={[styles.item, styles.danger]}>
+          <TouchableOpacity onPress={handleLogout} style={[styles.item, styles.danger]}>
             <Text style={{ color: "#d64f3a" }}>Log Out</Text>
             <Ionicons name="log-out" size={20} color="#d64f3a" />
           </TouchableOpacity>

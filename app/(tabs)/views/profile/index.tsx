@@ -34,7 +34,7 @@ export default function ProfileScreen() {
         {/* Perfil */}
         <View style={styles.profileCard}>
           <Image
-            source={require("../../../../assets/images/icon.png")}
+            source={require("../../../../assets/images/cemex_dma_spgg.png")}
             style={styles.avatar}
           />
           <View style={styles.profileInfo}>

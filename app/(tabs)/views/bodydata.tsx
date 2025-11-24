@@ -50,7 +50,7 @@ export default function DModelSection() {
             >
               <View style={styles.imgProfile}>
                 <Image
-                  source={require("../../../assets/images/icon.png")}
+                  source={require("../../../assets/images/cemex_dma_spgg.png")}
                   style={styles.profileImage}
                 />
               </View>

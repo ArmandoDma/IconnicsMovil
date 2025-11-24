@@ -70,7 +70,7 @@ export function HomeScreen() {
               <View key={index} style={styles.notiItem}>
                 <View style={styles.notiIcon}>
                   <Image
-                    source={require("../../../assets/images/icon.png")}
+                    source={require("../../../assets/images/iconnics_logo.png")}
                     style={styles.notiImage}
                   />
                 </View>

@@ -1,8 +1,9 @@
+import { getUserById } from "@/hooks/api";
 import { logoutToken } from "@/hooks/apiToken";
 import { useAuth } from "@/hooks/authcontext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -16,13 +17,26 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function MenuScreen() {
   const router = useRouter();
   const {user, setUser} = useAuth()
+  const [userDetails, setUserDetails] = useState<any>(null);
+
+  useEffect(() => {
+      const fetchUserDetails = async () => {
+        if (user?.id) {
+          try {
+            const data = await getUserById(user.id);
+            setUserDetails(data);
+          } catch (err: any) {
+            console.error("Error al traer usuario:", err.message);
+          }
+        }
+      };
+      fetchUserDetails();
+    }, [user]);
 
   const handleLogout = async () => {
   try {
-    if (user) {
-      console.log("Logout con id:", user.id); // <-- debug
+    if (user) {      
       const res = await logoutToken(user.id);
-      console.log("Respuesta API:", res);
 
       await setUser(null);
       router.replace("/login");
@@ -61,7 +75,7 @@ export default function MenuScreen() {
           </View>
           <TouchableOpacity style={styles.item}>
             <Text style={styles.itemLabel}>Email</Text>
-            <Text>armando@example.com</Text>
+            <Text>{userDetails?.correo}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.item}>
             <Text style={styles.itemLabel}>Change Password</Text>

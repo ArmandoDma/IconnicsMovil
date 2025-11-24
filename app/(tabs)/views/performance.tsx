@@ -72,8 +72,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 22,
+    marginTop: 15,
     marginBottom: 15,
-    color: "#0057ff",
+    color: "#000",
     fontWeight: "700",
   },
   statsGrid: {

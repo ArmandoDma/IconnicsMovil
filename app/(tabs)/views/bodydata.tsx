@@ -1,9 +1,11 @@
 import ThreeDRender from "@/components/3drender";
 import StepsChart from "@/components/piechart";
+import { getUserById } from "@/hooks/api";
+import { useAuth } from "@/hooks/authcontext";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native"; // 👈 importa el hook
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -18,19 +20,53 @@ const { width } = Dimensions.get("window");
 
 export default function DModelSection() {
   const [reloadKey, setReloadKey] = useState(0);
+  const { user } = useAuth();
+  const [userDetails, setUserDetails] = useState<any>(null);
 
   useFocusEffect(
     useCallback(() => {
-      // Cada vez que la screen se enfoca, cambiamos la key → fuerza remount
       setReloadKey((prev) => prev + 1);
     }, [])
   );
 
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      if (user?.id) {
+        try {
+          const data = await getUserById(user.id);
+          setUserDetails(data);
+        } catch (err: any) {
+          console.error("Error al traer usuario:", err.message);
+        }
+      }
+    };
+    fetchUserDetails();
+  }, [user]);
+
   const [scrollEnabled, setScrollEnabled] = useState(true);
 
+  function getFirstName(fullName: string): string {
+  if (!fullName) return "";
+  // Divide por espacios y toma el primer elemento
+  return fullName.trim().split(" ")[0];
+}
+
+
+  function guessGenderByName(fullName: string): "Male" | "Female" | "Unknown" {
+    const firstName = getFirstName(fullName);
+    if (!firstName) return "Unknown";
+
+    const lastChar = firstName.toLowerCase().slice(-1);
+
+    if (lastChar === "a") {
+      return "Female";
+    } else {
+      return "Male";
+    }
+  }
   return (
     <SafeAreaView style={{ backgroundColor: "#fff" }}>
-      <ScrollView style={styles.container} >
+      <ScrollView style={styles.container}>
         <View style={styles.cardModel}>
           <View style={styles.anatomyCanvas}>
             <ThreeDRender key={reloadKey} />
@@ -56,13 +92,19 @@ export default function DModelSection() {
               </View>
               <View style={styles.userCap}>
                 <View style={styles.tabs}>
-                  <Text style={styles.cardSubtitle}>Weight: 70 kg</Text>
+                  <Text style={styles.cardSubtitle}>
+                    Weight: {parseInt(userDetails?.peso) + " kg"}
+                  </Text>
                   <Text style={styles.cardSubtitle}>Blood Type: A+</Text>
                 </View>
-                <Text style={styles.username}>Username</Text>
+                <Text style={styles.username}>{userDetails?.nombre}</Text>
                 <View style={styles.caps}>
-                  <Text style={styles.cardSubtitle}>Genre: Male</Text>
-                  <Text style={styles.cardSubtitle}>Age: 23 years old</Text>
+                  <Text style={styles.cardSubtitle}>
+                    Genre: {guessGenderByName(userDetails?.nombre)}
+                  </Text>
+                  <Text style={styles.cardSubtitle}>
+                    Age: {userDetails?.edad} years old
+                  </Text>
                 </View>
               </View>
             </LinearGradient>
@@ -161,7 +203,7 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 20,
     justifyContent: "center",
-    overflow: 'hidden',
+    overflow: "hidden",
     alignItems: "center",
   },
   cardDetails: {
@@ -225,9 +267,9 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     fontWeight: "400",
     color: "#fff",
-    textShadowOffset: {width: 1, height: 1},
+    textShadowOffset: { width: 1, height: 1 },
     textShadowColor: "#707070",
-    textShadowRadius: 5
+    textShadowRadius: 5,
   },
   cardValue: {
     fontSize: 16,
@@ -277,7 +319,7 @@ const styles = StyleSheet.create({
   stepsChart: {
     marginTop: 15,
     width: "100%",
-    height: 'auto',
+    height: "auto",
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 12,

@@ -25,22 +25,17 @@ export default function LoginScreen() {
       const data = await login(email, password);
       const userId = data.usuario.id;
       setUser(data.usuario)
-
-      // Traer el último token desde la DB
-      const lastToken = await getLastValidTokenByUser(userId);
-      console.log("Último token:", lastToken);
-
-      // Validar si está activo y vigente
+      
+      const lastToken = await getLastValidTokenByUser(userId);      
+    
       const isValid =
         lastToken &&
         lastToken.activo === 1 &&
         new Date(lastToken.fecha_expiracion) > new Date();
 
-      if (isValid) {
-        console.log("Token válido, entrando directo a la app");
+      if (isValid) {        
         router.replace("/(tabs)");
-      } else {
-        console.log("Token inválido o expirado, redirigiendo al login");
+      } else {      
         Alert.alert("Sesión expirada", "Por favor inicia sesión de nuevo");
       }
 

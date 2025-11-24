@@ -1,4 +1,5 @@
 import { BarcharGraph } from "@/components/barchar";
+import { useAuth } from "@/hooks/authcontext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -18,6 +19,7 @@ const { width } = Dimensions.get("window");
 export default function ProfileScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
   const router = useRouter();
+  const {user} = useAuth();
 
   return (
     <SafeAreaView style={{ backgroundColor: "#fff", flex: 1 }}>
@@ -38,8 +40,8 @@ export default function ProfileScreen() {
             style={styles.avatar}
           />
           <View style={styles.profileInfo}>
-            <Text style={styles.name}>Armando</Text>
-            <Text style={styles.level}>Intermediate</Text>
+            <Text style={styles.name}>{user?.nombre}</Text>
+            <Text style={styles.level}>{user?.correo}</Text>
             <View style={styles.statsRow}>
               <View style={styles.stat}>
                 <Text style={styles.statNumber}>1,208</Text>

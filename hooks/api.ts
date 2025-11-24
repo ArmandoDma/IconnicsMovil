@@ -60,7 +60,6 @@ export async function register(form: {
   sport: string;
   role: string;
 }) {
-  // Validaciones básicas
   if (!validateEmail(form.email)) {
     throw new Error(
       "Correo inválido. Usa un formato válido como ejemplo@correo.com"
@@ -72,7 +71,7 @@ export async function register(form: {
       "Contraseña inválida. Debe tener al menos 6 caracteres, incluyendo una letra y un número."
     );
   }
-  
+
   const payload = {
     nombre: `${form.username} ${form.lastname}`,
     edad: parseInt(form.age, 10),
@@ -90,6 +89,19 @@ export async function register(form: {
   } catch (error: any) {
     if (error.response) {
       throw new Error(error.response.data.message || "Error en el registro");
+    } else {
+      throw new Error("Error de red o servidor");
+    }
+  }
+}
+
+export async function getUserById(id: number) {
+  try {
+    const response = await api.get(`/${id}`);
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      throw new Error(error.response.data.message || "Error al obtener usuario");
     } else {
       throw new Error("Error de red o servidor");
     }

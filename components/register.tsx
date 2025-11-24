@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import DropDownPicker from "react-native-dropdown-picker";
 
+import { register } from "@/hooks/api";
+import { router } from "expo-router";
 import {
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 interface FormData {
@@ -47,7 +49,7 @@ export default function RegisterScreen() {
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
   const rolesValidos = ["Entrenador", "Deportista"];
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const {
       username,
       lastname,
@@ -98,7 +100,13 @@ export default function RegisterScreen() {
     }
 
     // Si todo pasa:
-    console.log("Formulario válido:", form);
+    try {
+    const response = await register(form);    
+    router.replace("/login")
+  } catch (err: any) {
+    alert(`Error en el registro: ${err.message}`);
+  }
+
   };
 
   const [openRole, setOpenRole] = useState(false);
@@ -109,7 +117,6 @@ export default function RegisterScreen() {
   ]);
 
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
   const [items, setItems] = useState([
     { label: "Cycling", value: "Cycling" },
     { label: "Running", value: "Running" },
@@ -131,6 +138,7 @@ export default function RegisterScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Write your name"
+                  placeholderTextColor={"#aaa"}
                   value={form.username}
                   onChangeText={(text) => handleChange("username", text)}
                 />
@@ -140,6 +148,7 @@ export default function RegisterScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Write your last name"
+                  placeholderTextColor={"#aaa"}
                   value={form.lastname}
                   onChangeText={(text) => handleChange("lastname", text)}
                 />
@@ -153,6 +162,7 @@ export default function RegisterScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Put your weight"
+                  placeholderTextColor={"#aaa"}
                   keyboardType="numeric"
                   value={form.weight}
                   onChangeText={(text) => handleChange("weight", text)}
@@ -163,6 +173,7 @@ export default function RegisterScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Write your height"
+                  placeholderTextColor={"#aaa"}
                   value={form.height}
                   onChangeText={(text) => handleChange("height", text)}
                 />
@@ -172,6 +183,7 @@ export default function RegisterScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Write your age"
+                  placeholderTextColor={"#aaa"}
                   keyboardType="numeric"
                   value={form.age}
                   onChangeText={(text) => handleChange("age", text)}
@@ -186,6 +198,7 @@ export default function RegisterScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Write your email"
+                  placeholderTextColor={"#aaa"}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   value={form.email}
@@ -197,6 +210,7 @@ export default function RegisterScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Set your password"
+                  placeholderTextColor={"#aaa"}
                   secureTextEntry
                   value={form.password}
                   onChangeText={(text) => handleChange("password", text)}
@@ -206,13 +220,16 @@ export default function RegisterScreen() {
             {/* Sport */}
             <View style={styles.fullWidth}>
               <Text style={styles.label}>Sport</Text>
-              <View style={{zIndex: 2000}}>
+              <View style={{ zIndex: 2000 }}>
                 <DropDownPicker
                   open={open}
-                  value={value}
+                  value={form.sport}
                   items={items}
                   setOpen={setOpen}
-                  setValue={setValue}
+                  setValue={(callback)=>{
+                    const newValue = callback(form.sport);
+                    handleChange("sport", newValue);
+                  }}
                   setItems={setItems}
                   placeholder="Select sport"
                   style={{ borderColor: "#aaa", height: 50 }}
@@ -225,7 +242,7 @@ export default function RegisterScreen() {
             {/* Role */}
             <View style={styles.fullWidth}>
               <Text style={styles.label}>Role</Text>
-              <View style={{zIndex: 1000}}>
+              <View style={{ zIndex: 1000 }}>
                 <DropDownPicker
                   open={openRole}
                   value={roleValue}
@@ -234,7 +251,7 @@ export default function RegisterScreen() {
                   setValue={(callback) => {
                     const newValue = callback(roleValue);
                     setRoleValue(newValue);
-                    handleChange("role", newValue); // 👈 actualiza tu form
+                    handleChange("role", newValue); 
                   }}
                   setItems={setRoleItems}
                   placeholder="Select role"

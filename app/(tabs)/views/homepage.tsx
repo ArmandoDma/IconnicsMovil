@@ -1,4 +1,5 @@
 import { BarcharGraph } from "@/components/barchar";
+import { useNotifications } from "@/hooks/notifications";
 import {
   Image,
   ScrollView,
@@ -11,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { healthTips, notifications } from "../../../components/tips";
 
 export function HomeScreen() {
+  useNotifications()
   return (
     <SafeAreaView style={{backgroundColor: "#fff"}}>
       <ScrollView contentContainerStyle={styles.container}>

@@ -18,27 +18,26 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const {setUser} = useAuth()
+  const { setUser } = useAuth();
 
   const handleLogin = async () => {
     try {
       const data = await login(email, password);
       const userId = data.usuario.id;
-      setUser(data.usuario)
-      
-      const lastToken = await getLastValidTokenByUser(userId);      
-    
+      setUser(data.usuario);      
+
+      const lastToken = await getLastValidTokenByUser(userId);
+
       const isValid =
         lastToken &&
         lastToken.activo === 1 &&
         new Date(lastToken.fecha_expiracion) > new Date();
 
-      if (isValid) {        
+      if (isValid) {
         router.replace("/(tabs)");
-      } else {      
+      } else {
         Alert.alert("Sesión expirada", "Por favor inicia sesión de nuevo");
       }
-
     } catch (err: any) {
       Alert.alert("Error", err.message);
     }

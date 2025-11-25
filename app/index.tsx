@@ -8,8 +8,8 @@ import { useAuth } from "../hooks/authcontext";
 const Index = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-  const router = useRouter(); // hook de expo-router
-
+  const router = useRouter();
+  
   useEffect(() => {
     const checkSession = async () => {
       try {

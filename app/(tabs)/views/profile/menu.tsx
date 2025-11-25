@@ -1,9 +1,10 @@
 import { getUserById } from "@/hooks/api";
 import { logoutToken } from "@/hooks/apiToken";
 import { useAuth } from "@/hooks/authcontext";
+import { useNotifications } from "@/hooks/notifications";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -16,39 +17,56 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MenuScreen() {
   const router = useRouter();
-  const {user, setUser} = useAuth()
+  const { user, setUser } = useAuth();
   const [userDetails, setUserDetails] = useState<any>(null);
+  const { enableNotifications, disableNotifications } = useNotifications();
 
-  useEffect(() => {
+  useFocusEffect(
+    useCallback(() => {
       const fetchUserDetails = async () => {
         if (user?.id) {
           try {
             const data = await getUserById(user.id);
             setUserDetails(data);
-          } catch (err: any) {
-            console.error("Error al traer usuario:", err.message);
+            setDailyReminders(!!data.push_token)
+          } catch (err) {
+            console.log("Error al traer usuario:", err);
           }
         }
       };
+
       fetchUserDetails();
-    }, [user]);
+    }, [user])
+  );
+
+  const toggleSwitch = async () => {
+    if (!dailyReminders) {
+      // Estaba OFF → Activar
+      const ok = await enableNotifications();
+      if (ok) setDailyReminders(true);
+    } else {
+      // Estaba ON → Desactivar
+      const ok = await disableNotifications();
+      if (ok) setDailyReminders(false);
+    }
+  };
 
   const handleLogout = async () => {
-  try {
-    if (user) {      
-      const res = await logoutToken(user.id);
+    try {
+      if (user) {
+        const res = await logoutToken(user.id);
 
-      await setUser(null);
-      router.replace("/login");
-    } else {
-      console.log("No hay usuario en contexto");
+        await setUser(null);
+        router.replace("/login");
+      } else {
+        console.log("No hay usuario en contexto");
+      }
+    } catch (err: any) {
+      console.error("Error en logout:", err.message);
     }
-  } catch (err: any) {
-    console.error("Error en logout:", err.message);
-  }
-};
+  };
 
-  const [dailyReminders, setDailyReminders] = useState(true);
+  const [dailyReminders, setDailyReminders] = useState<boolean>(false);
   const [promotions, setPromotions] = useState(false);
   const [activityAlerts, setActivityAlerts] = useState(true);
   const [darkTheme, setDarkTheme] = useState(true);
@@ -95,7 +113,10 @@ export default function MenuScreen() {
           </View>
           <View style={styles.item}>
             <Text>Daily Reminders</Text>
-            <Switch value={dailyReminders} onValueChange={setDailyReminders} />
+            <Switch
+              value={dailyReminders}
+              onValueChange={toggleSwitch}
+            />
           </View>
           <View style={styles.item}>
             <Text>Promotions & Discounts</Text>
@@ -183,7 +204,10 @@ export default function MenuScreen() {
               Account
             </Text>
           </View>
-          <TouchableOpacity onPress={handleLogout} style={[styles.item, styles.danger]}>
+          <TouchableOpacity
+            onPress={handleLogout}
+            style={[styles.item, styles.danger]}
+          >
             <Text style={{ color: "#d64f3a" }}>Log Out</Text>
             <Ionicons name="log-out" size={20} color="#d64f3a" />
           </TouchableOpacity>

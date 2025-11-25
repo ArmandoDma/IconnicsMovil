@@ -1,29 +1,112 @@
-import { WeeklyChart } from "@/components/linechart";
+import { WeeklyLineChart } from "@/components/linechart";
+import { getMediciones } from "@/hooks/apiMediciones";
+import React, { useEffect, useState } from "react";
 import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
-const quickStats = [
-  { title: "Calories", value: "523 kcal" },
-  { title: "Active Time", value: "1h 32m" },
-  { title: "Heart Rate", value: "124 bpm" },
-  { title: "Workouts", value: "2" },
-];
+// Tipos
+interface Medicion {
+  id_medicion: number;
+  id_sensor: number;
+  hidratacion: number;
+  temperatura: number;
+  frecuencia_cardiaca: number;
+  fecha_hora: string;
+}
 
-const history = [
-  { day: "Monday", data: "612 kcal • 3.4 km • 1h 12m" },
-  { day: "Sunday", data: "428 kcal • 2.1 km • 43m" },
-  { day: "Saturday", data: "885 kcal • 6.2 km • 1h 55m" },
-];
+interface QuickStat {
+  title: string;
+  value: string;
+}
 
-const highlights = [
-  "🔥 New personal record: 6.2 km",
-  "💧 Optimal hydration level",
-  "💤 Good rest: 7h 48m",
-];
+interface HistoryItem {
+  day: string;
+  data: string;
+}
 
 export default function PerformanceScreen() {
+  const [quickStats, setQuickStats] = useState<QuickStat[]>([]);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [highlights, setHighlights] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const medicionesRaw: any[] = await getMediciones();
+        const mediciones: Medicion[] = medicionesRaw.map(m => ({
+          ...m,
+          hidratacion: Number(m.hidratacion),
+          temperatura: Number(m.temperatura),
+          frecuencia_cardiaca: Number(m.frecuencia_cardiaca),
+        }));
+
+        // Agrupar por día
+        const grouped: { [day: string]: Medicion[] } = {};
+        mediciones.forEach(m => {
+          const day = new Date(m.fecha_hora).toLocaleDateString("en-US", { weekday: "long" });
+          if (!grouped[day]) grouped[day] = [];
+          grouped[day].push(m);
+        });
+
+        // Calcular stats
+        let totalCalories = 0;
+        let totalMinutes = 0;
+        let bpmSum = 0;
+        let bpmCount = 0;
+        let workoutsCount = 0;
+
+        const historyArray: HistoryItem[] = [];
+
+        Object.keys(grouped).forEach(day => {
+          const dayMeasurements = grouped[day];
+
+          // Simular calorías y duración basadas en hidratación, BPM y temperatura
+          const dayCalories = dayMeasurements.reduce((acc, cur) => {
+            const calories = cur.frecuencia_cardiaca * 0.12 + cur.hidratacion * 0.5 + cur.temperatura * 0.3;
+            return acc + calories;
+          }, 0);
+
+          const dayMinutes = Math.min(dayMeasurements.length * 30, 120); // máximo 2h por día
+          const dayBPM = dayMeasurements.reduce((acc, cur) => acc + cur.frecuencia_cardiaca, 0) / dayMeasurements.length;
+
+          totalCalories += dayCalories;
+          totalMinutes += dayMinutes;
+          bpmSum += dayBPM;
+          bpmCount += 1;
+          workoutsCount += dayMeasurements.length ? 1 : 0;
+
+          historyArray.push({
+            day,
+            data: `${Math.round(dayCalories)} kcal • ${(
+              dayMinutes / 60
+            ).toFixed(1)} h • BPM: ${Math.round(dayBPM)}`,
+          });
+        });
+
+        setQuickStats([
+          { title: "Calories", value: `${Math.round(totalCalories)} kcal` },
+          { title: "Active Time", value: `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}m` },
+          { title: "Heart Rate", value: `${Math.round(bpmSum / bpmCount)} bpm` },
+          { title: "Workouts", value: `${workoutsCount}` },
+        ]);
+
+        setHistory(historyArray);
+
+        setHighlights([
+          `🔥 Highest daily calories: ${Math.round(Math.max(...historyArray.map(h => parseFloat(h.data.split(" ")[0]))))} kcal`,
+          `💧 Optimal hydration detected`,
+          `💤 Average BPM: ${Math.round(bpmSum / bpmCount)} bpm`,
+        ]);
+      } catch (error) {
+        console.error("Error fetching mediciones:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <SafeAreaView style={{ backgroundColor: "#fff" }}>
       <ScrollView style={styles.container}>
@@ -39,7 +122,7 @@ export default function PerformanceScreen() {
 
         <Text style={styles.sectionTitle}>Weekly Progress</Text>
         <View style={styles.graphContainer}>
-          <WeeklyChart />
+          <WeeklyLineChart />
         </View>
 
         <Text style={styles.sectionTitle}>History</Text>

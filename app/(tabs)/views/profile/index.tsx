@@ -1,8 +1,9 @@
 import { BarcharGraph } from "@/components/barchar";
+import { getMediciones } from "@/hooks/apiMediciones"; // tu API de mediciones
 import { useAuth } from "@/hooks/authcontext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -16,10 +17,68 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
+interface Medicion {
+  id_medicion: number;
+  id_sensor: number;
+  hidratacion: number;
+  temperatura: number;
+  frecuencia_cardiaca: number;
+  fecha_hora: string;
+}
+
 export default function ProfileScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
   const router = useRouter();
-  const {user} = useAuth();
+  const { user } = useAuth();
+
+  // Estados de métricas semanales
+  const [weeklyCalories, setWeeklyCalories] = useState(0);
+  const [weeklyTime, setWeeklyTime] = useState("0:00:00");
+  const [weeklyActivityHours, setWeeklyActivityHours] = useState(0);
+
+  const calculateMetrics = (mediciones: Medicion[]) => {
+    if (mediciones.length === 0) return;
+
+    // Simulación de calorías quemadas: calorías ≈ bpm * 0.1 * tiempo (min)
+    const totalCalories = mediciones.reduce((acc, cur) => {
+      const durationMin = 60; // asumimos 1 hora por medición para simular
+      return acc + cur.frecuencia_cardiaca * 0.1 * durationMin;
+    }, 0);
+
+    setWeeklyCalories(Math.round(totalCalories));
+
+    // Simulación de tiempo total de actividad
+    const totalTimeMin = mediciones.length * 60; // 1 hora por medición
+    const hours = Math.floor(totalTimeMin / 60);
+    const minutes = totalTimeMin % 60;
+    const seconds = 0;
+    setWeeklyTime(`${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`);
+
+    // Actividad en horas
+    setWeeklyActivityHours(parseFloat((totalTimeMin / 60).toFixed(1)));
+  };
+
+  const fetchWeeklyMetrics = async () => {
+    try {
+      const medicionesRaw: any[] = await getMediciones();
+      const mediciones: Medicion[] = medicionesRaw.map(m => ({
+        ...m,
+        hidratacion: Number(m.hidratacion),
+        temperatura: Number(m.temperatura),
+        frecuencia_cardiaca: Number(m.frecuencia_cardiaca),
+      }));
+
+      calculateMetrics(mediciones);
+    } catch (err) {
+      console.error("Error fetching mediciones:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchWeeklyMetrics();
+    const interval = setInterval(fetchWeeklyMetrics, 5000); // actualizar cada 5s
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <SafeAreaView style={{ backgroundColor: "#fff", flex: 1 }}>
@@ -27,7 +86,6 @@ export default function ProfileScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Profile</Text>
-
           <TouchableOpacity onPress={() => router.push("/views/profile/menu")}>
             <Ionicons name="menu" size={28} color="#333" />
           </TouchableOpacity>
@@ -52,7 +110,7 @@ export default function ProfileScreen() {
                 <Text style={styles.statLabel}>Following</Text>
               </View>
               <View style={styles.stat}>
-                <Text style={styles.statNumber}>120h</Text>
+                <Text style={styles.statNumber}>{weeklyActivityHours}h</Text>
                 <Text style={styles.statLabel}>Activity</Text>
               </View>
             </View>
@@ -63,11 +121,11 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>This Week</Text>
           <View style={styles.metrics}>
-            <Text style={styles.metric}>Calories: 160.5 kcal</Text>
-            <Text style={styles.metric}>Time: 01:03:30</Text>
+            <Text style={styles.metric}>Calories: {weeklyCalories} kcal</Text>
+            <Text style={styles.metric}>Time: {weeklyTime}</Text>
           </View>
           <View style={styles.graphPlaceholder}>
-            <BarcharGraph></BarcharGraph>
+            <BarcharGraph />
           </View>
         </View>
 
@@ -78,14 +136,11 @@ export default function ProfileScreen() {
             <Ionicons name="barbell" size={24} color="#107be5" />
             <View style={styles.trainingInfo}>
               <Text style={styles.trainingTitle}>Bulgarian Squat</Text>
-              <Text style={styles.trainingNote}>
-                Keep-fit Exce · 4 days ago
-              </Text>
+              <Text style={styles.trainingNote}>Keep-fit Exce · 4 days ago</Text>
             </View>
           </View>
         </View>
 
-        {/* Galería */}
         {/* Logros recientes */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Achievements</Text>
@@ -114,27 +169,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   title: { fontSize: 22, fontWeight: "700", color: "#2b2b2b" },
-  submenu: {
-    backgroundColor: "#f7f9ff",
-    borderRadius: 10,
-    marginBottom: 15,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 8,
-    gap: 10,
-  },
-  menuText: { fontSize: 16, color: "#333" },
-  stats: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
-    marginTop: 10,
-  },
   profileCard: {
     width: width - 40,
     flexDirection: "row",
@@ -203,20 +237,6 @@ const styles = StyleSheet.create({
   trainingInfo: { marginLeft: 10 },
   trainingTitle: { fontSize: 16, fontWeight: "600" },
   trainingNote: { fontSize: 13, color: "#777" },
-  photo: {
-    width: 80,
-    height: 80,
-    borderRadius: 10,
-    marginRight: 10,
-  },
-  navbar: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderColor: "#eee",
-    backgroundColor: "#fff",
-  },
   achievementRow: {
     flexDirection: "row",
     gap: 15,
@@ -235,6 +255,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#555",
     marginTop: 5,
-    textAlign: 'center'
+    textAlign: "center",
   },
 });

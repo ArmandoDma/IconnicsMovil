@@ -1,9 +1,10 @@
 import ThreeDRender from "@/components/3drender";
 import StepsChart from "@/components/piechart";
 import { getUserById } from "@/hooks/api";
+import { getMediciones } from "@/hooks/apiMediciones"; // tu API de mediciones
 import { useAuth } from "@/hooks/authcontext";
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from "@react-navigation/native"; // 👈 importa el hook
+import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -18,17 +19,33 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
+interface Medicion {
+  id_medicion: number;
+  id_sensor: number;
+  hidratacion: number;
+  temperatura: number;
+  frecuencia_cardiaca: number;
+  fecha_hora: string;
+}
+
 export default function DModelSection() {
   const [reloadKey, setReloadKey] = useState(0);
   const { user } = useAuth();
   const [userDetails, setUserDetails] = useState<any>(null);
 
+  // Estados de métricas en tiempo real
+  const [heartRate, setHeartRate] = useState(0);
+  const [bloodPressure, setBloodPressure] = useState("120 / 60");
+  const [sleepHours, setSleepHours] = useState(7.5);
+  const [oxygenation, setOxygenation] = useState(97);
+
   useFocusEffect(
     useCallback(() => {
-      setReloadKey((prev) => prev + 1);
+      setReloadKey(prev => prev + 1);
     }, [])
   );
 
+  // Traer detalles del usuario
   useEffect(() => {
     const fetchUserDetails = async () => {
       if (user?.id) {
@@ -43,27 +60,57 @@ export default function DModelSection() {
     fetchUserDetails();
   }, [user]);
 
-  const [scrollEnabled, setScrollEnabled] = useState(true);
+  // Función para obtener métricas de la API y simular algunas
+  const fetchMetrics = async () => {
+    try {
+      const medicionesRaw: any[] = await getMediciones();
+      const mediciones: Medicion[] = medicionesRaw.map(m => ({
+        ...m,
+        hidratacion: Number(m.hidratacion),
+        temperatura: Number(m.temperatura),
+        frecuencia_cardiaca: Number(m.frecuencia_cardiaca),
+      }));
+
+      if (mediciones.length === 0) return;
+
+      // Heart Rate promedio
+      const totalBPM = mediciones.reduce((acc, cur) => acc + cur.frecuencia_cardiaca, 0);
+      setHeartRate(Math.round(totalBPM / mediciones.length));
+
+      // Simular Blood Pressure según hidratación y bpm
+      const systolic = 110 + Math.round(totalBPM / 10);
+      const diastolic = 60 + Math.round(mediciones[0].hidratacion / 10);
+      setBloodPressure(`${systolic} / ${diastolic}`);
+
+      // Simular Sleep (aleatorio dentro de un rango)
+      setSleepHours(parseFloat((6 + Math.random() * 2).toFixed(1)));
+
+      // Simular Oxigenation
+      setOxygenation(95 + Math.min(5, Math.round(totalBPM / mediciones.length / 20)));
+
+    } catch (err) {
+      console.error("Error fetching mediciones:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchMetrics(); // primera carga
+    const interval = setInterval(fetchMetrics, 5000); // actualizar cada 5s
+    return () => clearInterval(interval);
+  }, []);
 
   function getFirstName(fullName: string): string {
-  if (!fullName) return "";
-  // Divide por espacios y toma el primer elemento
-  return fullName.trim().split(" ")[0];
-}
-
+    if (!fullName) return "";
+    return fullName.trim().split(" ")[0];
+  }
 
   function guessGenderByName(fullName: string): "Male" | "Female" | "Unknown" {
     const firstName = getFirstName(fullName);
     if (!firstName) return "Unknown";
-
     const lastChar = firstName.toLowerCase().slice(-1);
-
-    if (lastChar === "a") {
-      return "Female";
-    } else {
-      return "Male";
-    }
+    return lastChar === "a" ? "Female" : "Male";
   }
+
   return (
     <SafeAreaView style={{ backgroundColor: "#fff" }}>
       <ScrollView style={styles.container}>
@@ -93,7 +140,7 @@ export default function DModelSection() {
               <View style={styles.userCap}>
                 <View style={styles.tabs}>
                   <Text style={styles.cardSubtitle}>
-                    Weight: {parseInt(userDetails?.peso) + " kg"}
+                    Weight: {parseInt(userDetails?.peso) || 0} kg
                   </Text>
                   <Text style={styles.cardSubtitle}>Blood Type: A+</Text>
                 </View>
@@ -103,7 +150,7 @@ export default function DModelSection() {
                     Genre: {guessGenderByName(userDetails?.nombre)}
                   </Text>
                   <Text style={styles.cardSubtitle}>
-                    Age: {userDetails?.edad} years old
+                    Age: {userDetails?.edad || 0} years old
                   </Text>
                 </View>
               </View>
@@ -123,14 +170,14 @@ export default function DModelSection() {
                 <Ionicons name="flask" size={28} color="#0057ff" />
                 <View style={styles.infoCard}>
                   <Text style={styles.cardSubtitle}>Blood Pressure</Text>
-                  <Text>120 / 60 mmHg</Text>
+                  <Text>{bloodPressure} mmHg</Text>
                 </View>
               </View>
               <View style={styles.cardRow}>
                 <Ionicons name="heart" size={28} color="#ff4d4d" />
                 <View style={styles.infoCard}>
                   <Text style={styles.cardSubtitle}>Heart Rate</Text>
-                  <Text>72 bpm</Text>
+                  <Text>{heartRate} bpm</Text>
                 </View>
               </View>
               <View style={styles.cardRow}>
@@ -147,21 +194,14 @@ export default function DModelSection() {
                 <Ionicons name="checkmark-circle" size={22} color="#4caf50" />
                 <View style={styles.testInfo}>
                   <Text style={styles.cardSubtitle}>Sleep Tracking</Text>
-                  <Text>Realizado — 7.2h registradas</Text>
-                </View>
-              </View>
-              <View style={styles.testItem}>
-                <Ionicons name="calendar" size={22} color="#0057ff" />
-                <View style={styles.testInfo}>
-                  <Text style={styles.cardSubtitle}>Glucose</Text>
-                  <Text>Programado — 15 Nov 2025 a las 8:00 AM</Text>
+                  <Text>Realizado — {sleepHours}h registradas</Text>
                 </View>
               </View>
               <View style={styles.testItem}>
                 <Ionicons name="checkmark-circle" size={22} color="#4caf50" />
                 <View style={styles.testInfo}>
                   <Text style={styles.cardSubtitle}>Oxigenation</Text>
-                  <Text>Realizado — 97% saturación</Text>
+                  <Text>Realizado — {oxygenation}% saturación</Text>
                 </View>
               </View>
             </View>
@@ -180,6 +220,9 @@ export default function DModelSection() {
     </SafeAreaView>
   );
 }
+
+// Mantener el resto de estilos igual
+
 
 const styles = StyleSheet.create({
   container: {

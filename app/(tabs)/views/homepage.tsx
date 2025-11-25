@@ -1,6 +1,9 @@
 import { BarcharGraph } from "@/components/barchar";
+import { getMediciones } from "@/hooks/apiMediciones";
 import { useNotifications } from "@/hooks/notifications";
+import React, { useEffect, useState } from "react";
 import {
+  Dimensions,
   Image,
   ScrollView,
   StyleSheet,
@@ -11,40 +14,102 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { healthTips, notifications } from "../../../components/tips";
 
+const { width } = Dimensions.get("window");
+
+interface Medicion {
+  id_medicion: number;
+  id_sensor: number;
+  hidratacion: number;
+  temperatura: number;
+  frecuencia_cardiaca: number;
+  fecha_hora: string;
+}
+
 export function HomeScreen() {
-  useNotifications()
+  useNotifications();
+
+  const [avgHeartRate, setAvgHeartRate] = useState(0);
+  const [avgHydratation, setAvgHydratation] = useState(0);
+  const [avgBloodOxygen, setAvgBloodOxygen] = useState(0);
+  const [avgLoseCalories, setAvgLoseCalories] = useState(0);
+
+  const fetchData = async () => {
+    try {
+      const medicionesRaw: any[] = await getMediciones();
+      const mediciones: Medicion[] = medicionesRaw.map(m => ({
+        ...m,
+        hidratacion: Number(m.hidratacion),
+        temperatura: Number(m.temperatura),
+        frecuencia_cardiaca: Number(m.frecuencia_cardiaca),
+      }));
+
+      if (mediciones.length === 0) return;
+
+      // Heart Rate promedio
+      const totalBPM = mediciones.reduce((acc, cur) => acc + cur.frecuencia_cardiaca, 0);
+      setAvgHeartRate(Math.round(totalBPM / mediciones.length));
+
+      // Hidratación promedio
+      const totalHydra = mediciones.reduce((acc, cur) => acc + cur.hidratacion, 0);
+      setAvgHydratation(Math.round(totalHydra / mediciones.length));
+
+      // Simular oxígeno en sangre
+      const avgOxygen = 95 + Math.min(5, Math.round(totalBPM / mediciones.length / 20));
+      setAvgBloodOxygen(avgOxygen);
+
+      // Simular calorías perdidas
+      const totalCalories = mediciones.reduce(
+        (acc, cur) => acc + cur.frecuencia_cardiaca * 0.12 + cur.hidratacion * 0.5 + cur.temperatura * 0.3,
+        0
+      );
+      setAvgLoseCalories(Math.round(totalCalories));
+    } catch (error) {
+      console.error("Error fetching mediciones:", error);
+    }
+  };
+
+  useEffect(() => {
+    // Primera carga
+    fetchData();
+
+    // Actualizar cada 5 segundos (ajustable)
+    const interval = setInterval(fetchData, 5000);
+
+    return () => clearInterval(interval); // limpiar al desmontar
+  }, []);
+
   return (
-    <SafeAreaView style={{backgroundColor: "#fff"}}>
+    <SafeAreaView style={{ backgroundColor: "#fff" }}>
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Dashboard</Text>
           <Text style={styles.subtitle}>
-            Welcome back! Here's an overview of your health metrics and recent
-            activity.
+            Welcome back! Here's an overview of your health metrics and recent activity.
           </Text>
         </View>
 
         <View style={styles.metricsGrid}>
           <View style={[styles.metricCard, styles.cardBlue]}>
             <Text style={styles.metricTitle}>Average Heart Rate</Text>
-            <Text style={styles.metricValue}>0 bpm</Text>
+            <Text style={styles.metricValue}>{avgHeartRate} bpm</Text>
           </View>
           <View style={[styles.metricCard, styles.cardOrange]}>
             <Text style={styles.metricTitle}>Average Blood Oxygen</Text>
-            <Text style={styles.metricValue}>0%</Text>
+            <Text style={styles.metricValue}>{avgBloodOxygen}%</Text>
           </View>
           <View style={[styles.metricCard, styles.cardBlue]}>
             <Text style={styles.metricTitle}>Average Hydratation</Text>
-            <Text style={styles.metricValue}>0%</Text>
+            <Text style={styles.metricValue}>{avgHydratation}%</Text>
           </View>
           <View style={[styles.metricCard, styles.cardOrange]}>
             <Text style={styles.metricTitle}>Average Lose Calories</Text>
-            <Text style={styles.metricValue}>0 kcal</Text>
+            <Text style={styles.metricValue}>{avgLoseCalories} kcal</Text>
           </View>
+
           <View style={styles.chartSection}>
             <Text style={styles.chartTitle}>Project Analytics</Text>
             <View style={styles.chart}>
-              <BarcharGraph></BarcharGraph>
+              <BarcharGraph />
             </View>
           </View>
 
@@ -58,8 +123,7 @@ export function HomeScreen() {
                 <View style={styles.tipContent}>
                   <Text style={styles.tipTitle}>{tip.food}</Text>
                   <Text style={styles.tipNutrients}>
-                    <Text style={styles.tipLabel}>Nutrients:</Text>{" "}
-                    {tip.nutrients.join(", ")}
+                    <Text style={styles.tipLabel}>Nutrients:</Text> {tip.nutrients.join(", ")}
                   </Text>
                 </View>
               </View>
@@ -145,7 +209,6 @@ const styles = StyleSheet.create({
     height: 300,
     backgroundColor: "#f0f0f0",
     padding: 20,
-    overflow: "hidden",
     borderRadius: 20,
     borderColor: "#aaa",
     borderWidth: 1,
@@ -153,8 +216,9 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   chart: {
-    width: "100%",
+    width: width - 40,
     alignItems: "center",
+    justifyContent: "center",
     left: -20,
     position: "absolute",
     zIndex: 100,
